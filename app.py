@@ -13,9 +13,9 @@ def home():
     return '✅ Bot is running!'
 
 # ——— Telegram bot ayarları ———
-api_id = 21830452  # Telegram API ID'nizi buraya girin
-api_hash = '2852cd53b42fc0e57bdcf9e29f0ae71e'  # Telegram API Hash'inizi buraya girin
-phone = '+923271343743'  # Telegram telefon numaranız
+api_id = 26294863  # Telegram API ID'nizi buraya girin
+api_hash = '4d2eb4aa34d63fb07fc0bb94d51c682d'  # Telegram API Hash'inizi buraya girin
+phone = '+923331704687'  # Telegram telefon numaranız
 client = TelegramClient(phone, api_id, api_hash)
 
 source_channel_ids = [
