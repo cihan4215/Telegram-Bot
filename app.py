@@ -51,7 +51,6 @@ async def handler(event):
 async def run_bot():
     if not os.path.exists(session_file):
         print("Session file not found, starting Telegram authentication...")
-        # Start the Telegram client without needing input()
         await client.connect()  # Connect manually before starting
         await client.start(phone=phone)  # This triggers authentication without waiting for input
         print("Authentication successful!")
@@ -59,6 +58,7 @@ async def run_bot():
         print("Session file found, starting bot directly.")
         await client.connect()  # Ensure connection before running
     
+    # Make sure the bot keeps running
     await client.run_until_disconnected()
 
 # Run Flask and Telegram bot together
