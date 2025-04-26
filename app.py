@@ -1,77 +1,47 @@
-import os
-import threading
-import datetime
-from flask import Flask
 from telethon import TelegramClient, events
+import datetime
+import re
 
-# Flask server setup
-app = Flask(__name__)
+# Telegram API bilgilerin
+api_id = 26294863
+api_hash = '4d2eb4aa34d63fb07fc0bb94d51c682d'
+phone = '+923331704687'
 
-@app.route('/')
-def home():
-    return '✅ Bot is running!'
+# Telegram Client başlat
+client = TelegramClient(phone, api_id, api_hash)
 
-# Telegram bot settings
-api_id = 26294863  # Your Telegram API ID
-api_hash = '4d2eb4aa34d63fb07fc0bb94d51c682d'  # Your Telegram API Hash
-phone = '+923331704687'  # Your Telegram phone number
-
-# Define the session file location
-session_file = 'my_telegram_session.session'  # Ensure this file is on Render's environment
-
-# Telegram Client
-client = TelegramClient(session_file, api_id, api_hash)
-
+# Takip edilecek kaynak kanal ID'leri
 source_channel_ids = [
-    -1002500350398, -1002130943146, -1001662061478, -1001722849883,
-    # Add more channels here
+    -1002500350398, -1001963997401, -1001662061478, -1001722849883,
+    # ... Diğerlerini buraya ekleyebilirsin ...
 ]
-DESTINATION_CHANNEL_ID = -1001835842902  # The channel where messages will be forwarded
 
-keywords = ['ECA', 'eca', 'Launching', 'Soon', 'Prelaunch', 'Pre-Launch', 'PreCall', 'Pre', 'Mc', 'Tomorrow']
+# Hedef kanal ID'si (mesajların gönderileceği kanal)
+DESTINATION_CHANNEL_ID = -1001835842902
+
+# Anahtar kelimeler
+keywords = ['ECA', 'eca', 'Launching', 'Soon', 'Prelaunch', 'Pre-Launch', 'PreCall', 'Pre', 'Tomorrow']
+
+# Engellenen kelimeler
 bad_words = ['Launched', 'Called', 'Pinksale', 'Ethereum', 'SOL', 'solana']
 
-# Telegram event handler
 @client.on(events.NewMessage(chats=source_channel_ids))
 async def handler(event):
-    text = event.raw_text
-    # Bad word filter
-    if any(word in text.lower() for word in bad_words):
-        print(f"{datetime.datetime.now()} ❌ Bad word in {event.chat_id}")
+    # Önce kötü kelime içeriyor mu kontrol et
+    if any(re.search(r'\b' + re.escape(bad_word) + r'\b', event.raw_text, re.IGNORECASE) for bad_word in bad_words):
+        print(f"{datetime.datetime.now()} - Kötü kelime içeriyor: {event.chat_id}")
         return
-    # Keyword check
-    for kw in keywords:
-        if kw.lower() in text.lower():
-            print(f"{datetime.datetime.now()} ✅ Found '{kw}' in {event.chat_id}")
+
+    # Anahtar kelime içeriyor mu kontrol et
+    for keyword in keywords:
+        if re.search(r'\b' + re.escape(keyword) + r'\b', event.raw_text, re.IGNORECASE):
+            print(f"{datetime.datetime.now()} - Anahtar kelime bulundu: {keyword} - {event.chat_id}")
             await event.forward_to(DESTINATION_CHANNEL_ID)
             return
-    print(f"{datetime.datetime.now()} ℹ️ No keyword in {event.chat_id}")
 
-# Bot start function
-async def run_bot():
-    if not os.path.exists(session_file):
-        print("Session file not found, starting Telegram authentication...")
-        await client.connect()  # Connect manually before starting
-        await client.start(phone=phone)  # This triggers authentication without waiting for input
-        print("Authentication successful!")
-    else:
-        print("Session file found, starting bot directly.")
-        await client.connect()  # Ensure connection before running
-    
-    # Make sure the bot keeps running
-    await client.run_until_disconnected()
+    print(f"{datetime.datetime.now()} - Anahtar kelime bulunamadı: {event.chat_id}")
 
-# Run Flask and Telegram bot together
-if __name__ == '__main__':
-    # Set the port for Flask server (Render/Heroku automatically assign this)
-    port = int(os.environ.get('PORT', 8000))
-
-    # Run Flask server in the background
-    threading.Thread(
-        target=lambda: app.run(host='0.0.0.0', port=port),
-        daemon=True
-    ).start()
-
-    # Start the Telegram bot (asynchronously)
-    import asyncio
-    asyncio.run(run_bot())
+# Client başlat
+client.start()
+print("✅ Bot çalışıyor... Gelen mesajları dinliyor.")
+client.run_until_disconnected()
