@@ -16,7 +16,7 @@ def home():
 api_id = 21830452
 api_hash = '2852cd53b42fc0e57bdcf9e29f0ae71e'
 phone = '+923271343743'
-client = TelegramClient(phone, api_id, api_hash)
+client = TelegramClient('my_session', api_id, api_hash)
 
 source_channel_ids = [
     -1002500350398, -1001963997401, -1001662061478, -1001722849883,
