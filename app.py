@@ -47,7 +47,7 @@ async def handler(event):
 # Bot başlatma fonksiyonu
 def run_bot():
     # Eğer session dosyası yoksa doğrulama işlemi başlatılacak
-    if not os.path.exists('session_name.session'):
+    if not os.path.exists(f'{phone}.session'):
         print("Session dosyası bulunamadı, Telegram doğrulaması başlatılıyor...")
         client.start()  # Bu komut, kullanıcıyı doğrulama işlemi için yönlendirecektir
         print("Doğrulama başarılı!")
