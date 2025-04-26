@@ -13,34 +13,30 @@ def home():
     return '✅ Bot is running!'
 
 # ——— Telegram bot ayarları ———
-api_id = 26294863  # Telegram API ID'niz
-api_hash = '4d2eb4aa34d63fb07fc0bb94d51c682d'  # Telegram API Hash'iniz
-phone = '+923331704687'  # Telefon numaranız
+api_id = 26294863  # Telegram API ID'nizi buraya girin
+api_hash = '4d2eb4aa34d63fb07fc0bb94d51c682d'  # Telegram API Hash'inizi buraya girin
+phone = '+923331704687'  # Telegram telefon numaranız
+client = TelegramClient(phone, api_id, api_hash)
 
-# Session dosyası
-session_file = '+923331704687.session'  # Lokal session dosyanızın ismi
-
-# Telegram Client
-client = TelegramClient(session_file, api_id, api_hash)
-
-# Takip edilecek kanallar
 source_channel_ids = [
     -1002500350398, -1002130943146, -1001662061478, -1001722849883,
-    # ... diğer kanallar
+    # … istediğiniz diğer kanallar
 ]
-DESTINATION_CHANNEL_ID = -1001835842902  # Mesajları ileteceğin kanal ID'si
+DESTINATION_CHANNEL_ID = -1001835842902  # Mesajları göndereceğiniz kanal ID'si
 
-# Kelime filtreleri
-keywords = ['ECA', 'eca', 'Launching', 'Soon', 'Prelaunch', 'Pre-Launch', 'PreCall', 'Pre', 'Mc', 'Tomorrow']
+keywords = ['ECA', 'eca', 'Launching', 'Soon', 'Prelaunch',
+            'Pre-Launch', 'PreCall', 'Pre', 'Mc', 'Tomorrow']
 bad_words = ['Launched', 'Called', 'Pinksale', 'Ethereum', 'SOL', 'solana']
 
-# Yeni mesaj geldiğinde çalışacak
+# Telegram event handler
 @client.on(events.NewMessage(chats=source_channel_ids))
 async def handler(event):
     text = event.raw_text
+    # Kötü kelime filtresi
     if any(re.search(rf'\b{re.escape(w)}\b', text, re.IGNORECASE) for w in bad_words):
         print(f"{datetime.datetime.now()} ❌ Bad word in {event.chat_id}")
         return
+    # Anahtar kelime kontrolü
     for kw in keywords:
         if re.search(rf'\b{re.escape(kw)}\b', text, re.IGNORECASE):
             print(f"{datetime.datetime.now()} ✅ Found “{kw}” in {event.chat_id}")
@@ -48,22 +44,27 @@ async def handler(event):
             return
     print(f"{datetime.datetime.now()} ℹ️ No keyword in {event.chat_id}")
 
-# Botu başlat
+# Bot başlatma fonksiyonu
 def run_bot():
-    if not os.path.exists(session_file):
-        print("Session dosyası bulunamadı! Giriş yapman lazım.")
+    # Eğer session dosyası yoksa doğrulama işlemi başlatılacak
+    if not os.path.exists('session_name.session'):
+        print("Session dosyası bulunamadı, Telegram doğrulaması başlatılıyor...")
+        client.start()  # Bu komut, kullanıcıyı doğrulama işlemi için yönlendirecektir
+        print("Doğrulama başarılı!")
     else:
-        print("Session dosyası bulundu, client bağlanıyor...")
-    
-    client.connect()
-    if not client.is_user_authorized():
-        print("Kullanıcı giriş yapmamış. Lütfen önce lokalde doğrulama yap.")
-        exit(1)
-    
+        print("Session dosyası mevcut, doğrudan botu başlatıyoruz.")
     client.run_until_disconnected()
 
-# Flask server ve bot paralel çalışacak
+# Flask server'ı ve Telegram botunu paralel çalıştır
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 10000))
-    threading.Thread(target=lambda: app.run(host='0.0.0.0', port=port), daemon=True).start()
+    # Flask server'ı için port numarasını belirleyin (Render/Heroku gibi platformlarda otomatik alır)
+    port = int(os.environ.get('PORT', 8000))
+
+    # Flask server'ı arka planda çalıştır
+    threading.Thread(
+        target=lambda: app.run(host='0.0.0.0', port=port),
+        daemon=True
+    ).start()
+
+    # Telegram botunu çalıştır
     run_bot()
