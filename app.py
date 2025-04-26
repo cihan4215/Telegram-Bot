@@ -1,47 +1,60 @@
-from telethon import TelegramClient, events
+import os
+import threading
 import datetime
 import re
+from flask import Flask
+from telethon import TelegramClient, events
 
-# Telegram API bilgilerin
+# ——— Flask “keep-alive” server ———
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return '✅ Bot is running!'
+
+# ——— Telegram bot ayarları ———
 api_id = 26294863
 api_hash = '4d2eb4aa34d63fb07fc0bb94d51c682d'
 phone = '+923331704687'
-
-# Telegram Client başlat
 client = TelegramClient(phone, api_id, api_hash)
 
-# Takip edilecek kaynak kanal ID'leri
 source_channel_ids = [
     -1002500350398, -1001963997401, -1001662061478, -1001722849883,
-    # ... Diğerlerini buraya ekleyebilirsin ...
+    # … istediğin diğer kanallar
 ]
+DESTINATION_CHANNEL_ID = -1002436534012
 
-# Hedef kanal ID'si (mesajların gönderileceği kanal)
-DESTINATION_CHANNEL_ID = -1001835842902
-
-# Anahtar kelimeler
-keywords = ['ECA', 'eca', 'Launching', 'Soon', 'Prelaunch', 'Pre-Launch', 'PreCall', 'Pre', 'Tomorrow']
-
-# Engellenen kelimeler
+keywords = ['ECA', 'eca', 'Launching', 'Soon', 'Prelaunch',
+            'Pre-Launch', 'PreCall', 'Pre', 'Tomorrow']
 bad_words = ['Launched', 'Called', 'Pinksale', 'Ethereum', 'SOL', 'solana']
 
 @client.on(events.NewMessage(chats=source_channel_ids))
 async def handler(event):
-    # Önce kötü kelime içeriyor mu kontrol et
-    if any(re.search(r'\b' + re.escape(bad_word) + r'\b', event.raw_text, re.IGNORECASE) for bad_word in bad_words):
-        print(f"{datetime.datetime.now()} - Kötü kelime içeriyor: {event.chat_id}")
+    text = event.raw_text
+    # Kötü kelime filtresi
+    if any(re.search(rf'\b{re.escape(w)}\b', text, re.IGNORECASE) for w in bad_words):
+        print(f"{datetime.datetime.now()} ❌ Bad word in {event.chat_id}")
         return
-
-    # Anahtar kelime içeriyor mu kontrol et
-    for keyword in keywords:
-        if re.search(r'\b' + re.escape(keyword) + r'\b', event.raw_text, re.IGNORECASE):
-            print(f"{datetime.datetime.now()} - Anahtar kelime bulundu: {keyword} - {event.chat_id}")
+    # Anahtar kelime kontrolü
+    for kw in keywords:
+        if re.search(rf'\b{re.escape(kw)}\b', text, re.IGNORECASE):
+            print(f"{datetime.datetime.now()} ✅ Found “{kw}” in {event.chat_id}")
             await event.forward_to(DESTINATION_CHANNEL_ID)
             return
+    print(f"{datetime.datetime.now()} ℹ️ No keyword in {event.chat_id}")
 
-    print(f"{datetime.datetime.now()} - Anahtar kelime bulunamadı: {event.chat_id}")
+def run_bot():
+    client.start()
+    print("🤖 Bot started, listening…")
+    client.run_until_disconnected()
 
-# Client başlat
-client.start()
-print("✅ Bot çalışıyor... Gelen mesajları dinliyor.")
-client.run_until_disconnected()
+if __name__ == '__main__':
+    # 1) Flask’ı arka planda ayağa kaldır
+    port = int(os.environ.get('PORT', 8000))
+    threading.Thread(
+        target=lambda: app.run(host='0.0.0.0', port=port),
+        daemon=True
+    ).start()
+
+    # 2) Telegram botu çalıştır
+    run_bot()
