@@ -13,21 +13,22 @@ def home():
     return '✅ Bot is running!'
 
 # ——— Telegram bot ayarları ———
-api_id = 21830452
-api_hash = '2852cd53b42fc0e57bdcf9e29f0ae71e'
-phone = '+923271343743'
+api_id = 21830452  # Telegram API ID'nizi buraya girin
+api_hash = '2852cd53b42fc0e57bdcf9e29f0ae71e'  # Telegram API Hash'inizi buraya girin
+phone = '+923271343743'  # Telegram telefon numaranız
 client = TelegramClient(phone, api_id, api_hash)
 
 source_channel_ids = [
     -1002500350398, -1001963997401, -1001662061478, -1001722849883,
-    # … istediğin diğer kanallar
+    # … istediğiniz diğer kanallar
 ]
-DESTINATION_CHANNEL_ID = -1002436534012
+DESTINATION_CHANNEL_ID = -1002436534012  # Mesajları göndereceğiniz kanal ID'si
 
 keywords = ['ECA', 'eca', 'Launching', 'Soon', 'Prelaunch',
             'Pre-Launch', 'PreCall', 'Pre', 'Tomorrow']
 bad_words = ['Launched', 'Called', 'Pinksale', 'Ethereum', 'SOL', 'solana']
 
+# Telegram event handler
 @client.on(events.NewMessage(chats=source_channel_ids))
 async def handler(event):
     text = event.raw_text
@@ -43,18 +44,22 @@ async def handler(event):
             return
     print(f"{datetime.datetime.now()} ℹ️ No keyword in {event.chat_id}")
 
+# Bot başlatma fonksiyonu
 def run_bot():
     client.start()
     print("🤖 Bot started, listening…")
     client.run_until_disconnected()
 
+# Flask server'ı ve Telegram botunu paralel çalıştır
 if __name__ == '__main__':
-    # 1) Flask’ı arka planda ayağa kaldır
+    # Flask server'ı için port numarasını belirleyin (Render/Heroku gibi platformlarda otomatik alır)
     port = int(os.environ.get('PORT', 8000))
+
+    # Flask server'ı arka planda çalıştır
     threading.Thread(
         target=lambda: app.run(host='0.0.0.0', port=port),
         daemon=True
     ).start()
 
-    # 2) Telegram botu çalıştır
+    # Telegram botunu çalıştır
     run_bot()
