@@ -19,13 +19,13 @@ phone = '+923271343743'  # Telegram telefon numaranız
 client = TelegramClient(phone, api_id, api_hash)
 
 source_channel_ids = [
-    -1002500350398, -1001963997401, -1001662061478, -1001722849883,
+    -1002500350398, -1002130943146, -1001662061478, -1001722849883,
     # … istediğiniz diğer kanallar
 ]
-DESTINATION_CHANNEL_ID = -1002436534012  # Mesajları göndereceğiniz kanal ID'si
+DESTINATION_CHANNEL_ID = -1001835842902  # Mesajları göndereceğiniz kanal ID'si
 
 keywords = ['ECA', 'eca', 'Launching', 'Soon', 'Prelaunch',
-            'Pre-Launch', 'PreCall', 'Pre', 'Tomorrow']
+            'Pre-Launch', 'PreCall', 'Pre', 'Mc', 'Tomorrow']
 bad_words = ['Launched', 'Called', 'Pinksale', 'Ethereum', 'SOL', 'solana']
 
 # Telegram event handler
