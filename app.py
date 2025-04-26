@@ -21,7 +21,7 @@ phone = '+923331704687'  # Telegram telefon numaranız
 session_file = '/etc/secrets/my_telegram_session.session'  # Render'daki secret file yoluna göre
 
 # Telegram Client
-client = TelegramClient(phone, api_id, api_hash, session=session_file)
+client = TelegramClient(session_file, api_id, api_hash)
 
 source_channel_ids = [
     -1002500350398, -1002130943146, -1001662061478, -1001722849883,
