@@ -46,13 +46,21 @@ async def handler(event):
 
 # Bot başlatma fonksiyonu
 def run_bot():
-    # Eğer session dosyası yoksa doğrulama işlemi başlatılacak
-    if not os.path.exists(f'{phone}.session'):
+    session_file = f'{phone}.session'
+
+    # Eğer session dosyası varsa, eski session dosyasını silelim
+    if os.path.exists(session_file):
+        print("Eski session dosyası bulunuyor, siliniyor...")
+        os.remove(session_file)
+
+    # Eğer session dosyası yoksa, doğrulama işlemi başlatılacak
+    if not os.path.exists(session_file):
         print("Session dosyası bulunamadı, Telegram doğrulaması başlatılıyor...")
         client.start()  # Bu komut, kullanıcıyı doğrulama işlemi için yönlendirecektir
         print("Doğrulama başarılı!")
     else:
         print("Session dosyası mevcut, doğrudan botu başlatıyoruz.")
+    
     client.run_until_disconnected()
 
 # Flask server'ı ve Telegram botunu paralel çalıştır
