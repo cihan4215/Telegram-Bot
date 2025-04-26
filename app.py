@@ -16,7 +16,12 @@ def home():
 api_id = 26294863  # Telegram API ID'nizi buraya girin
 api_hash = '4d2eb4aa34d63fb07fc0bb94d51c682d'  # Telegram API Hash'inizi buraya girin
 phone = '+923331704687'  # Telegram telefon numaranız
-client = TelegramClient(phone, api_id, api_hash)
+
+# Session dosyasını secret file'dan al
+session_file = '/etc/secrets/my_telegram_session.session'  # Render'daki secret file yoluna göre
+
+# Telegram Client
+client = TelegramClient(phone, api_id, api_hash, session=session_file)
 
 source_channel_ids = [
     -1002500350398, -1002130943146, -1001662061478, -1001722849883,
@@ -46,13 +51,6 @@ async def handler(event):
 
 # Bot başlatma fonksiyonu
 def run_bot():
-    session_file = f'{phone}.session'
-
-    # Eğer session dosyası varsa, eski session dosyasını silelim
-    if os.path.exists(session_file):
-        print("Eski session dosyası bulunuyor, siliniyor...")
-        os.remove(session_file)
-
     # Eğer session dosyası yoksa, doğrulama işlemi başlatılacak
     if not os.path.exists(session_file):
         print("Session dosyası bulunamadı, Telegram doğrulaması başlatılıyor...")
